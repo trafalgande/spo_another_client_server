@@ -28,18 +28,5 @@
 
 #define perro(x) {fprintf(stderr, "%s:%d: %s: %s\n", __FILE__, __LINE__, x, strerror(errno));exit(1);}
 
-enum COMMAND_TYPE {
-    CREATE,
-    READ,
-    UPDATE,
-    DELETE
-};
 
-struct Api {
-    enum COMMAND_TYPE command;
-    char* params;
-    char* nelem;
-    char* path;
-    char* sign;
-    char* right;
-};
+

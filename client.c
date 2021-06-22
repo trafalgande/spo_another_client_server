@@ -7,6 +7,7 @@ int index_of(char * str, char* substr){
     return position;
 }
 
+
 void send_cmd(int sock, int pid) {
 	char str[MAX_MSG_LENGTH] = {0};
     char full[MAX_MSG_LENGTH] = {0};
@@ -38,7 +39,6 @@ void send_cmd(int sock, int pid) {
                 bzero(full, sizeof full);
             }
         }
-
     }
 	kill(pid, SIGKILL);
 	printf("Goodbye.\n");
@@ -76,5 +76,6 @@ int main() {
         send_cmd(sock, pid);
 	}
 	else receive(sock);
+
 	return 0;
 }
