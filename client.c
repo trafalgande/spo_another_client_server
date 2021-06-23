@@ -1,12 +1,5 @@
 ﻿#include "mt.h"
-
-int index_of(char * str, char* substr){
-    char *result = strstr(str, substr);
-    if (result==NULL) return -1;
-    int position = result - str;
-    return position;
-}
-
+#include "util.h"
 
 void send_cmd(int sock, int pid) {
 	char str[MAX_MSG_LENGTH] = {0};

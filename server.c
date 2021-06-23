@@ -4,10 +4,15 @@
 #define D(...) fprintf(new_stream, __VA_ARGS__)
 
 int main() {
-    init_db();
+//    init_db();
+//    api_t * api_ = parse_cmd_to_api_struct("{\"cmd\":\"create\",\"param\":\"node\",\"paths_n\":1,\"paths\":[{\"actualPath\":\"a\"}],\"nelem\":{\"elementKey\":\"b\",\"init_values_n\":1,\"element_init_values\":[{\"init_value_key\":\"p\",\"utf_value\":\"p\"}]},\"from_root\":1}");
+//    char *res4 = api_create(api_->paths[0]->actualPath, api_->elem_n,api_->elems, NULL);
 //    api_t * api_ = parse_cmd_to_api_struct("{\"cmd\":\"read\",\"paths_n\":1,\"paths\":[{\"actualPath\":\"a\",\"conds\":[{\"key\":\"r\",\"sign\":\"\\u003d\",\"int_value\":2}],\"operators\":[],\"cond_n\":1}],\"from_root\":1}");
-//    char *res4 = api_read(api_->path_n, api_->paths, api_->fromRoot);
 //    printf("%s\n", res4);
+//    api_ = parse_cmd_to_api_struct("{\"cmd\":\"read\",\"paths_n\":1,\"paths\":[{\"actualPath\":\"*\",\"conds\":[{\"key\":\"r\",\"sign\":\"\\u003d\",\"int_value\":2}],\"operators\":[],\"cond_n\":1}],\"from_root\":1}");
+//    res4 = api_read(api_->path_n, api_->paths, api_->fromRoot, NULL);
+//    printf("%s\n", res4);
+
 
     int sock;
     struct sockaddr_in name;
@@ -68,21 +73,20 @@ int main() {
                 switch (api_struct->command) {
                     case CREATE: {
                         strcpy(response, api_create(api_struct->paths[0]->actualPath, api_struct->elem_n,
-                                                    api_struct->elems));
+                                                    api_struct->elems, new_stream));
                         break;
                     }
                     case READ: {
-                        strcpy(response, api_read(api_struct->path_n, api_struct->paths,
-                                                  api_struct->fromRoot));
+                        api_read(api_struct->path_n, api_struct->paths, api_struct->fromRoot, new_stream);
                         break;
                     }
                     case UPDATE: {
                         strcpy(response, api_update(api_struct->paths[0]->actualPath, api_struct->elem_n,
-                                                    api_struct->elems));
+                                                    api_struct->elems, new_stream));
                         break;
                     }
                     case DELETE: {
-                        strcpy(response, api_delete(api_struct->paths[0]->actualPath));
+                        strcpy(response, api_delete(api_struct->paths[0]->actualPath, new_stream));
                         break;
                     }
                     default: {

@@ -3,7 +3,7 @@
 //
 
 #include <stdbool.h>
-#include <bson/bson.h>
+#include <bson.h>
 
 #ifndef SPO_NOW_UTIL_H
 #define SPO_NOW_UTIL_H
@@ -57,7 +57,7 @@ api_t *new_api(cmd_t command, elem_t** elems, int elem_n, char* nelem_part_path,
 
 const int index_of(char *str, char *substr);
 
-int is_cond(bson_t b, int cond_length, cond_t *conds[], int operators[]);
+int is_cond(bson_t b, int cond_length, cond_t *conds[], const int operators[]);
 
 int is_pathcond(int pathcond_length, path_t *, char *current_key);
 

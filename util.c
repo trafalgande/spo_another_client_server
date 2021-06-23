@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "util.h"
-#include <bson/bson.h>
+#include <bson.h>
+
 
 char *substring(char *destination, const char *source, int beg, int n) {
     // extracts `n` characters from the source string starting from `beg` index
@@ -74,10 +75,8 @@ api_t *new_api(cmd_t command, elem_t** elems, int elem_n, char* nelem_part_path,
 }
 
 
-int is_cond(bson_t b, int cond_length, cond_t **conds,
-            int *operators) {
+int is_cond(bson_t b, int cond_length, cond_t **conds, const int *operators) {
     int sum = 0;
-
 
     if (cond_length == 0) return 1;
     int current = 1;
@@ -105,9 +104,7 @@ int is_cond(bson_t b, int cond_length, cond_t **conds,
                         break;
                     } else current = 0;
                     break;
-
                 }
-
 
                 if (strcmp(conds[i]->type, "int") == 0) {
                     if (!BSON_ITER_HOLDS_INT(&iter)) {
@@ -155,7 +152,6 @@ int is_cond(bson_t b, int cond_length, cond_t **conds,
             } else {
                 current_value = current_value && current;
                 if (i == cond_length - 1) sum += current_value;
-
             }
         }
     }
