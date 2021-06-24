@@ -7,6 +7,9 @@
 //#include "io.h"
 #include <bson.h>
 #include <json.h>
+int sch=0;
+int max_sch=0;
+
 
 #define BUFFER_SIZE 1024
 
@@ -60,11 +63,12 @@ void write_bson(bson_t b) {
 bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond_length, path_t **pathconds) {
     bson_t inner;
     bson_init(&inner);
+
     ////printf("sctrcmp: %s - %s\n",path,path_eq);
 
     while (bson_iter_next(&iter)) {
-        printf("path: %s\n", bson_iter_key(&iter));
-        printf("pathcount: %d\n\n", pathcond_count);
+        //printf("path: %s\n", bson_iter_key(&iter));
+        //printf("pathcount: %d\n\n", pathcond_count);
         if (BSON_ITER_HOLDS_UTF8 (&iter)) {
             if (pathcond_count == pathcond_length)
                 if (pathcond_length > 0)
@@ -85,7 +89,7 @@ bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond
                     } else bson_append_int32(&inner, bson_iter_key(&iter), -1, bson_iter_int32(&iter));
 
 
-        } else {
+        } else if (BSON_ITER_HOLDS_DOCUMENT(&iter)){
             bson_t *b_res;
             uint32_t object_len;
             const uint8_t *object_buf;
@@ -101,13 +105,13 @@ bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond
             }
 
             if (pathcond_length > 0) {
-                printf("%s === %s", pathconds[index_flag ? pathcond_count : 0]->actualPath, bson_iter_key(&iter));
+               // printf("%s === %s", pathconds[index_flag ? pathcond_count : 0]->actualPath, bson_iter_key(&iter));
                 if ((strcmp(pathconds[index_flag ? pathcond_count : 0]->actualPath, bson_iter_key(&iter)) == 0) ||
                     (strcmp(pathconds[index_flag ? pathcond_count : 0]->actualPath, "*") == 0)) {
 
                     if (pathconds[index_flag ? pathcond_count : 0]->cond_n == 0) {
                         flag = 1;
-                        printf("yes=%d", pathconds[index_flag ? pathcond_count : 0]->cond_n);
+                        //printf("yes=%d", pathconds[index_flag ? pathcond_count : 0]->cond_n);
                     } else if (is_cond(*b_res, pathconds[index_flag ? pathcond_count : 0]->cond_n,
                                        pathconds[index_flag ? pathcond_count : 0]->conditions,
                                        pathconds[index_flag ? pathcond_count : 0]->operators)) {
@@ -116,14 +120,16 @@ bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond
                     } else flag = 0;
                 } else flag = 0;
             } else flag = 0;
-            printf("indexflag: %d\n", index_flag);
-            printf("flag: %d\n", flag);
+//            printf("indexflag: %d\n", index_flag);
+//            printf("flag: %d\n", flag);
             //pathcond_count=0;
 
 
 
             //if (pathcond_count == pathcond_length) pathcond_count == -1;
             bson_t inner_inner;
+            sch+=1;
+            max_sch=(max_sch>sch)?max_sch:sch;
             if (index_flag == 0)
                 if (flag == 0)
                     inner_inner = recurrent_read_recurse(child, 0, pathcond_length, pathconds);
@@ -136,6 +142,7 @@ bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond
 
             bson_iter_t inner_inner_iter;
             bson_iter_init(&inner_inner_iter, &inner_inner);
+
             //bson_append_document(&inner, bson_iter_key(&iter), -1, &inner_inner);
 
             if (bson_iter_next(&inner_inner_iter)) {
@@ -143,7 +150,9 @@ bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond
                 //printf("inner=%s", bson_as_canonical_extended_json(&inner_inner,NULL));
             }
 //            bson_append_document(&inner, bson_iter_key(&iter), -1, &inner_inner);
-
+            bson_destroy(&inner_inner);
+            bson_destroy(b_res);
+            sch+=-1;
         }
     }
     //bson_append_document(&result_bson, bson_iter_key(&iter), -1, &inner);
@@ -159,14 +168,18 @@ bson_t recurrent_read_recurse(bson_iter_t iter, int pathcond_count, int pathcond
 bson_t recurrent_read_root(bson_iter_t iter, int pathcond_count, int pathcond_length, path_t **pathconds) {
     bson_t inner;
     bson_init(&inner);
+
     int end = 0;
     ////printf("sctrcmp: %s - %s\n",path,path_eq);
 
     //printf("path_eq: %s\n", path_eq);
     //printf("strcmp: %d\n", (strcmp(path, path_eq) == 0));
     while (bson_iter_next(&iter)) {
-        printf("path: %s\n", bson_iter_key(&iter));
-        printf("pathcount: %d\n\n", pathcond_count);
+        //printf("path: %s\n", bson_iter_key(&iter));
+        //printf("pathcount: %d\n\n", pathcond_count);
+
+
+
         //printf("iterated");
         if (BSON_ITER_HOLDS_UTF8 (&iter)) {
             //bson_append_utf8(&inner, bson_iter_key(&iter), -1, bson_iter_utf8(&iter, NULL), -1);
@@ -195,7 +208,7 @@ bson_t recurrent_read_root(bson_iter_t iter, int pathcond_count, int pathcond_le
                     } else bson_append_int32(&inner, bson_iter_key(&iter), -1, bson_iter_int32(&iter));
 
 
-        } else {
+        } else if (BSON_ITER_HOLDS_DOCUMENT(&iter)){
             ////printf("%s\n", bson_iter_key(&iter));
             bson_t *b_res;
             uint32_t object_len;
@@ -215,31 +228,33 @@ bson_t recurrent_read_root(bson_iter_t iter, int pathcond_count, int pathcond_le
             }
 
             if (pathcond_length > 0) {
-                printf("%s === %s", pathconds[index_flag ? pathcond_count : 0]->actualPath, bson_iter_key(&iter));
+                //printf("%s === %s", pathconds[index_flag ? pathcond_count : 0]->actualPath, bson_iter_key(&iter));
                 if ((strcmp(pathconds[index_flag ? pathcond_count : 0]->actualPath, bson_iter_key(&iter)) == 0) ||
                     (strcmp(pathconds[index_flag ? pathcond_count : 0]->actualPath, "*") == 0)) {
 
                     if (pathconds[index_flag ? pathcond_count : 0]->cond_n == 0) {
                         flag = 1;
-                        printf("yes=%d", pathconds[index_flag ? pathcond_count : 0]->cond_n);
+                        //printf("yes=%d", pathconds[index_flag ? pathcond_count : 0]->cond_n);
                     } else if (is_cond(*b_res, pathconds[index_flag ? pathcond_count : 0]->cond_n,
                                        pathconds[index_flag ? pathcond_count : 0]->conditions,
                                        pathconds[index_flag ? pathcond_count : 0]->operators)) {
                         //pathcond_count += 1;
                         flag = 1;
-                        printf("yes");
+                        //printf("yes");
                     } else flag = 0;
                 } else flag = 0;
             } else flag = 0;
-            printf("indexflag: %d\n", index_flag);
-            printf("flag: %d\n", flag);
-            printf("end: %d\n", end);
+//            printf("indexflag: %d\n", index_flag);
+//            printf("flag: %d\n", flag);
+//            printf("end: %d\n", end);
             //pathcond_count=0;
 
 
 
             //if (pathcond_count == pathcond_length) pathcond_count == -1;
             bson_t inner_inner;
+            sch+=1;
+            max_sch=(max_sch>sch)?max_sch:sch;
             if (index_flag == 0)
                 if (flag == 0)
                     inner_inner = recurrent_read_recurse(child, 0, pathcond_length, pathconds);
@@ -259,7 +274,9 @@ bson_t recurrent_read_root(bson_iter_t iter, int pathcond_count, int pathcond_le
                 //printf("inner=%s", bson_as_canonical_extended_json(&inner_inner,NULL));
             }
 //            bson_append_document(&inner, bson_iter_key(&iter), -1, &inner_inner);
-
+            bson_destroy(&inner_inner);
+            bson_destroy(b_res);
+            sch+=-1;
         }
     }
     //bson_append_document(&result_bson, bson_iter_key(&iter), -1, &inner);
@@ -275,7 +292,7 @@ char *api_read(int pathcond_length, path_t *pathconds[], int from_root, FILE *ne
 
     bson_t *b = read_bson_();
     char *buff = bson_as_canonical_extended_json(b, NULL);
-    printf("true: %s\n", buff);
+//    printf("true: %s\n", buff);
     bson_free(buff);
     bson_iter_t iter;
     bson_iter_init(&iter, b);
@@ -283,7 +300,7 @@ char *api_read(int pathcond_length, path_t *pathconds[], int from_root, FILE *ne
     bson_t result;
     if (from_root != 0) result = recurrent_read_root(iter, 0, pathcond_length, pathconds);
     else result = recurrent_read_recurse(iter, 0, pathcond_length, pathconds);
-
+    fprintf(new_stream, "max_sch: %d, sch: %d ",max_sch,sch);
     return bson_as_canonical_extended_json(&result, NULL);
 
 }

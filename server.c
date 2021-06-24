@@ -4,7 +4,7 @@
 #define D(...) fprintf(new_stream, __VA_ARGS__)
 
 int main() {
-//    init_db();
+   //init_db();
 //    api_t * api_ = parse_cmd_to_api_struct("{\"cmd\":\"create\",\"param\":\"node\",\"paths_n\":1,\"paths\":[{\"actualPath\":\"a\"}],\"nelem\":{\"elementKey\":\"b\",\"init_values_n\":1,\"element_init_values\":[{\"init_value_key\":\"p\",\"utf_value\":\"p\"}]},\"from_root\":1}");
 //    char *res4 = api_create(api_->paths[0]->actualPath, api_->elem_n,api_->elems, NULL);
 //    api_t * api_ = parse_cmd_to_api_struct("{\"cmd\":\"read\",\"paths_n\":1,\"paths\":[{\"actualPath\":\"a\",\"conds\":[{\"key\":\"r\",\"sign\":\"\\u003d\",\"int_value\":2}],\"operators\":[],\"cond_n\":1}],\"from_root\":1}");
@@ -17,7 +17,7 @@ int main() {
     int sock;
     struct sockaddr_in name;
     char buf[MAX_MSG_LENGTH] = {0};
-    char response[MAX_MSG_LENGTH] = {0};
+    char* response;
 
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -77,7 +77,8 @@ int main() {
                         break;
                     }
                     case READ: {
-                        api_read(api_struct->path_n, api_struct->paths, api_struct->fromRoot, new_stream);
+                        response = api_read(api_struct->path_n, api_struct->paths, api_struct->fromRoot, new_stream);
+                        send(new_socket, response, strlen(response), 0);
                         break;
                     }
                     case UPDATE: {
@@ -95,8 +96,7 @@ int main() {
                     }
                 }
                 D("\t[%d] Finished executing command.\n", pid);
-                send(new_socket, response, strlen(response), 0);
-                bzero(&response, strlen(response));
+                bson_free(response);
                 send(new_socket, "\n>\t", 3, MSG_NOSIGNAL);
             }
             close(new_socket);
