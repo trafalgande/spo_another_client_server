@@ -284,10 +284,8 @@ char *api_read(int pathcond_length, path_t *pathconds[], int from_root, FILE *ne
     if (from_root != 0) result = recurrent_read_root(iter, 0, pathcond_length, pathconds);
     else result = recurrent_read_recurse(iter, 0, pathcond_length, pathconds);
 
-    char* res = bson_as_relaxed_extended_json(&result, NULL);
-    fprintf(stdout, "%s", res);
+    return bson_as_canonical_extended_json(&result, NULL);
 
-    return res;
 }
 
 
